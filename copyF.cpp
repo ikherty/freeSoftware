@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <windows.h>
+#include <winbase.h>
 using namespace std;
 
 int readTXTfile(){//read txt file
