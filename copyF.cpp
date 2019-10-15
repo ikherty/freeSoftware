@@ -65,7 +65,7 @@ void toClipboard(const std::wstring &s){
 	GlobalFree(hg);
 }
 
-void fromClipboard(std::wstring &s){
+ccvoid fromClipboard(std::wstring &s){
 	if( OpenClipboard( hwnd )){
 		HGLOBAL hg = GetClipboardData( CF_UNICODETEXT );
 		if( hg ){
@@ -95,8 +95,7 @@ void fromClipboard(std::wstring &s){
 	}
 }
 
-void CopyText(HWND hWnd)
-{
+void CopyText(HWND hWnd){
     if(hWnd == NULL) return;
     if(!OpenClipboard(hWnd)) return;
     EmptyClipboard();
