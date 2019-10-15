@@ -51,48 +51,48 @@ int readWrite(){
 }
 
 void toClipboard(const std::wstring &s){
-OpenClipboard(0);
-EmptyClipboard();
-HGLOBAL hg=GlobalAlloc(GMEM_MOVEABLE,s.size()*sizeof(wchar_t));
-if (!hg){
-CloseClipboard();
-return;
-}
-memcpy(GlobalLock(hg),s.c_str(),s.size()*sizeof(wchar_t));
-GlobalUnlock(hg);
-SetClipboardData(CF_UNICODETEXT,hg);
-CloseClipboard();
-GlobalFree(hg);
+	OpenClipboard(0);
+	EmptyClipboard();
+	HGLOBAL hg=GlobalAlloc(GMEM_MOVEABLE,s.size()*sizeof(wchar_t));
+	if (!hg){
+		CloseClipboard();
+        return;
+	}
+	memcpy(GlobalLock(hg),s.c_str(),s.size()*sizeof(wchar_t));
+	GlobalUnlock(hg);
+	SetClipboardData(CF_UNICODETEXT,hg);
+	CloseClipboard();
+	GlobalFree(hg);
 }
 
 void fromClipboard(std::wstring &s){
-if( OpenClipboard( hwnd )){
-HGLOBAL hg = GetClipboardData( CF_UNICODETEXT );
-if( hg ){
-unsigned int sz = GlobalSize( hg );
-void* memory = GlobalLock( hg );
-const wchar_t* text = reinterpret_cast(memory);
-unsigned int cc = static_cast(wcsnlen(text, sz / sizeof(wchar_t)));
-if( memory ){
-s = text;
-for( unsigned int i = 0; i < s.size(); ++i ){
-if( s[i] == 0xA ){
-if( i > 0 ){
-if( s[i-1] != L'\r' ){
-s.insert( s.begin()+i, L'\r' );
-++i;
-}
-}else{
-s.insert( s.begin(), L'\r' );
-++i;
-}
-}
-}
-GlobalUnlock( hg );
-}
-}
-CloseClipboard();
-}
+	if( OpenClipboard( hwnd )){
+		HGLOBAL hg = GetClipboardData( CF_UNICODETEXT );
+		if( hg ){
+			unsigned int sz = GlobalSize( hg );
+			void* memory = GlobalLock( hg );
+			const wchar_t* text = reinterpret_cast(memory);
+			unsigned int cc = static_cast(wcsnlen(text, sz / sizeof(wchar_t)));
+			if( memory ){
+				s = text;
+				for( unsigned int i = 0; i < s.size(); ++i ){
+					if( s[i] == 0xA ){
+						if( i > 0 ){
+							if( s[i-1] != L'\r' ){
+								s.insert( s.begin()+i, L'\r' );
+								++i;
+							}
+						}else{
+							s.insert( s.begin(), L'\r' );
+							++i;
+						}
+					}
+				}
+				GlobalUnlock( hg );
+			}
+		}
+	CloseClipboard();
+	}
 }
 
 void CopyText(HWND hWnd)
@@ -108,32 +108,24 @@ void CopyText(HWND hWnd)
         CloseClipboard();
         return;
     } // if(dwSelStart == dwSelEnd)
-    
     DWORD dwStart, dwEnd;
-    if(dwSelStart < dwSelEnd)
-    {
+    if(dwSelStart < dwSelEnd){
         dwStart = dwSelStart;
         dwEnd = dwSelEnd;
     }
-    else
-    {
+    else{
         dwStart = dwSelEnd;
         dwEnd = dwSelStart;
     } // if(dwStart < dwEnd)
-    
     // length selection
     int nLength = dwEnd - dwStart;
-    
     TCHAR buff[MAXCHAR];
     GetWindowText(hWnd, buff, sizeof(buff));
-    
     HGLOBAL hglbCopy = GlobalAlloc(GMEM_MOVEABLE, (nLength + 1) * sizeof(TCHAR));
-    if(hglbCopy == NULL)
-    {
+    if(hglbCopy == NULL){
         CloseClipboard();
         return;
     } // if(hglbCopy == NULL)
-    
     LPTSTR lptstrCopy = (TCHAR*)GlobalLock(hglbCopy);
     memcpy(lptstrCopy, &buff[dwStart], nLength * sizeof(TCHAR));
     lptstrCopy[nLength] = _T('\0');
@@ -144,7 +136,6 @@ void CopyText(HWND hWnd)
     SetClipboardData(CF_TEXT, hglbCopy);
     #endif
     CloseClipboard();
-    
     GlobalFree(hglbCopy);
     GlobalFree(lptstrCopy);
 }
