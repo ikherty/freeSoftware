@@ -6,7 +6,7 @@ using namespace std;
 int readfromFile(){
 HFILE              hFile;
 //Имя читаемого файла
-string vasFileName="file.txt";
+string vasFileName="InFile.txt";
 DWORD              vwCounter;
 int                *virgRDWRBuff;
 BY_HANDLE_FILE_INFORMATION bhFileInformation;
@@ -78,7 +78,7 @@ delete[] virgRDWRBuff;
 
 int writetoFile(){
     HFILE              hFile;
-string vasFileName="file.txt";
+string vasFileName="InFil.txt";
 DWORD              vwCounter;
 int                *virgRDWRBuff;
 BY_HANDLE_FILE_INFORMATION bhFileInformation;
@@ -138,6 +138,7 @@ delete[] virgRDWRBuff;
 }
 
 int main(){
-	writetoFile();
+    readfromFile();
+	//writetoFile();
 	return 0;
 }
