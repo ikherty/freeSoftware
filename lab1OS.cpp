@@ -14,14 +14,14 @@ using namespace std;
 int main(){
 srand(time(NULL));
 
-byte *p;                    //адрес буфера
+byte *p;                      //адрес буфера
 HANDLE DIF, DOF;              //дескрипторы файлов
 __int64 c1, c2, fr;           //переменные для тактов пр-ра, частоты
 DWORD c;
-float averageTime,v;                    //время и скорость
+float averageTime,speed;                    //время и скорость
 
-IF=CreateFile((LPCTSTR)"InFil.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   
-OF=CreateFile((LPCTSTR)"OutFil.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);                      
+DIF=CreateFile((LPCTSTR)"InFil.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   
+DOF=CreateFile((LPCTSTR)"OutFil.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);                      
 	//имя
 	//открываем для чтения или записи
 	//совместное использование файла запрещено
@@ -30,14 +30,14 @@ OF=CreateFile((LPCTSTR)"OutFil.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE
 	//обычный файл (не скрытый и не какой-нибудь еще)
 	//то же здесь можно указывать флаг для некот. случаев
 
-if (IF==INVALID_HANDLE_VALUE || OF==INVALID_HANDLE_VALUE){ // если файлы не откррылись, то выход
+if(DIF==INVALID_HANDLE_VALUE || DOF==INVALID_HANDLE_VALUE){ // если файлы не открылись, выходим
 		cout << "Ошибка" << GetLastError() << endl;
 		cin.get();
 		return 0;
 	}
 
-for (int i=0; i<FileSize/4; i++)
-WriteFile(DIF,(LPVOID)rand(),4,&c,0);
+for(int i=0; i<FileSize/4; i++)
+	WriteFile(DIF,(LPVOID)rand(),4,&c,0);
 
 if(WriteFile==0){
     cout<< "Ошибка" << GetLastError()<< endl;
@@ -49,26 +49,26 @@ cout << "Size   |" << endl;
 cout << "buf    | mb/s" <<endl;
 cout << "change |" <<endl;
 
-for (int i=128; i<=1024; i*=2){                  // Для всех размеров буфера обмена
- t=0.0;
+for(int i=128; i<=1024; i*=2){                  // Для всех размеров буфера обмена
+ averageTime=0.0;
  p=(byte *)GlobalAlloc(GPTR,i);              //выделение памяти под буфер
- for (int j=0; j<M; j++){
- 	SetFilePointer(IF,0,NULL,FILE_BEGIN);     //установка файлового указателя в начало файла
- 	SetFilePointer(OF,0,NULL,FILE_BEGIN);
-	for (int k=0; k<FileSize/i; k++){                 //цикл столько раз, сколько блоков поместится в файле
+ for(int j=0; j<M; j++){
+ 	SetFilePointer(DIF,0,NULL,FILE_BEGIN);     //установка файлового указателя в начало файла
+ 	SetFilePointer(DOF,0,NULL,FILE_BEGIN);
+	for(int k=0; k<FileSize/i; k++){                 //цикл столько раз, сколько блоков поместится в файле
   		QueryPerformanceCounter((LARGE_INTEGER *)&c1);   //функция возвращает некоторое кол-во тактов пр-ра на данный момент
   		ReadFile(DIF,p,i,&c,0);  //чтение в буфер
   		WriteFile(DOF,p,i,&c,0);
   		QueryPerformanceCounter((LARGE_INTEGER *)&c2);
   		QueryPerformanceFrequency((LARGE_INTEGER *)&fr); //чтение в буфер
-  		t=t+(c2-c1)/(float)fr;                           //время
+  		averageTime=averageTime+(c2-c1)/(float)fr;                           //время
  	}
 }
 
-averageTime=averageTime/M;                                        // среднее время
-v=FileSize/(1024*1024*t);                     // скорость MB/s
-cout << i << "    | " << v << endl;
-GlobalFree(p);                                //освобождение памяти, занятой буфером
+averageTime=averageTime/M;                                  // среднее время
+speed=FileSize/(1024*1024*averageTime);                     // скорость MB/s
+cout<<i<<"    | "<<speed<<endl;
+GlobalFree(p);                                				//освобождение памяти, занятой буфером
 }
 //DeleteFile((LPCTSTR)"InFil.txt");
 //DeleteFile((LPCTSTR)"OutFil.txt");
