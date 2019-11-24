@@ -13,12 +13,11 @@ int main(){
 srand(time(NULL));
 byte *readBuff, *writeBuff;                                 //адреса буферов чтения и записи
 HANDLE DIF, DOF;                                            //дескрипторы файлов
-DWORD c;
+DWORD c;                                                    //число прочитанных файлов
 
 DIF=CreateFile((LPCTSTR)"InFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   
 DOF=CreateFile((LPCTSTR)"OutFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
               
-
 if(DIF==INVALID_HANDLE_VALUE || DOF==INVALID_HANDLE_VALUE){  //если файлы не открылись, выходим
     cout << "Ошибка" << GetLastError() << endl;
     cin.get();
@@ -32,7 +31,6 @@ for(int i=0; i<fileSize; i++){
 WriteFile(DIF,(LPVOID)data,fileSize,&c,NULL);                //заполняем файл
 SetFilePointer(DOF,0,NULL,FILE_BEGIN);                       //установка файлового указателя в начала файла
 readBuff=(byte*)GlobalAlloc(GMEM_FIXED,sizeReadBuff);        //выделение памяти под буферы чтения, записи, обмена
-
     
 for(int sizeWriteBuff=sizeReadBuff/2; sizeWriteBuff>=sizeReadBuff/16; sizeWriteBuff/=2){ 
     float t=clock();
@@ -44,18 +42,17 @@ for(int sizeWriteBuff=sizeReadBuff/2; sizeWriteBuff>=sizeReadBuff/16; sizeWriteB
         for(int k=0; k<sizeReadBuff/sizeWriteBuff;k++){      //кратность буфера записи к буферу чтения
                   CopyMemory(writeBuff,readBuff,sizeWriteBuff); //записываем в буфер записи
                   WriteFile(DOF,writeBuff,sizeWriteBuff,&c,0); //блок записываем в файл
-        }
-                            
+        }                    
     }
-        t=(clock()-t)/CLOCKS_PER_SEC;//??? ????? ???????
-        cout<<" t = "<<t<<endl; 
-        cout<<" kb/s = "<<500/t<<endl;                           //время
+    t=(clock()-t)/CLOCKS_PER_SEC;
+    cout<<" t = "<<t<<endl; 
+    cout<<" kb/s = "<<500/t<<endl;                           //время
     cout<<"done for "<<sizeWriteBuff<<endl<<endl; 
-    GlobalFree(writeBuff);                                   //освобождение памяти, занятой буферами
+    GlobalFree(writeBuff);                                   //освобождение памяти, занятой буфером
 }
 GlobalFree(readBuff);
-    CloseHandle(DIF);
-    CloseHandle(DOF);
+CloseHandle(DIF);
+CloseHandle(DOF);
 return 0;
 }
 
