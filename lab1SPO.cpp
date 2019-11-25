@@ -40,7 +40,7 @@ for(int sizeWriteBuff=sizeReadBuff/2; sizeWriteBuff>=sizeReadBuff/16; sizeWriteB
     for(int i=0; i<fileSize/sizeReadBuff; i++){              //сколько блоков поместится в файле
    	ReadFile(DIF,readBuff,sizeReadBuff,&c,0);                //считываем блок
         for(int k=0; k<sizeReadBuff/sizeWriteBuff;k++){      //кратность буфера записи к буферу чтения
-                  CopyMemory(writeBuff,readBuff,sizeWriteBuff); //записываем в буфер записи
+                  CopyMemory(writeBuff,readBuff+sizeWriteBuff*k,sizeWriteBuff); //записываем в буфер записи
                   WriteFile(DOF,writeBuff,sizeWriteBuff,&c,0); //блок записываем в файл
         }                    
     }
