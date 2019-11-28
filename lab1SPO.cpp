@@ -4,6 +4,7 @@
 #include <iostream>
 #include <windows.h>
 #include <ctime>
+#include <cstring>
 using namespace std;
 
 #define fileSize 256*1024                                   //размер файла
@@ -14,9 +15,9 @@ srand(time(NULL));
 byte *readBuff, *writeBuff;                                 //адреса буферов чтения и записи
 HANDLE DIF, DOF;                                            //дескрипторы файлов
 DWORD c;                                                    //число прочитанных файлов
-
+char name[10]="OutFile";
 DIF=CreateFile((LPCTSTR)"InFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   
-DOF=CreateFile((LPCTSTR)"OutFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+//DOF=CreateFile((LPCTSTR) "OutFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
               
 if(DIF==INVALID_HANDLE_VALUE || DOF==INVALID_HANDLE_VALUE){  //если файлы не открылись, выходим
     cout << "Ошибка" << GetLastError() << endl;
@@ -34,7 +35,11 @@ readBuff=(byte*)GlobalAlloc(GMEM_FIXED,sizeReadBuff);        //выделени�
     
 for(int sizeWriteBuff=sizeReadBuff/2; sizeWriteBuff>=sizeReadBuff/16; sizeWriteBuff/=2){ 
     float t=clock();
-	cout<<"sizeWriteBuff="<<sizeWriteBuff<<endl;
+    if(sizeWriteBuff==sizeReadBuff/2) DOF=CreateFile((LPCTSTR) "OutFile512.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    if(sizeWriteBuff==sizeReadBuff/4) DOF=CreateFile((LPCTSTR) "OutFile256.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    if(sizeWriteBuff==sizeReadBuff/8) DOF=CreateFile((LPCTSTR) "OutFile128.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    if(sizeWriteBuff==sizeReadBuff/16) DOF=CreateFile((LPCTSTR) "OutFile64.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+    cout<<"sizeWriteBuff="<<sizeWriteBuff<<endl;
 	writeBuff=(byte*)GlobalAlloc(GMEM_FIXED,sizeWriteBuff);
 	SetFilePointer(DIF,0,NULL,FILE_BEGIN);
     for(int i=0; i<fileSize/sizeReadBuff; i++){              //сколько блоков поместится в файле
