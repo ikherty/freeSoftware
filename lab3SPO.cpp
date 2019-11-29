@@ -1,60 +1,72 @@
-/*Основной поток создает 2 потока приостановленными. Затем запускает один из созданных потоков, который в свою очередь запускает другой поток. Измерить интервал времени от запуска первого потока до завершения второго в двух случаях:
-а) Второй поток создает файл нулевой длины и завершает работу
-б) Второй поток создает файл длиной 1К и завершает работу*/
+/*Организовать совместное использование мьютекса и события для защиты добавления элемента в очереди. Очередь произвольного формата. Событие сигнализирует чтение из очереди, а мьютекс - запись. Требуется снять статистику по времени использования объектов ядра*/
 #include <cstdlib>
 #include <iostream>
 #include <windows.h>
 using namespace std;
 
-void create0Kfile(){//a)
-    HANDLE DIF;
-    DIF=CreateFile((LPCTSTR)"0KFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);  
-	CloseHandle(DIF); 
+// OS_Lab1_Mutex.cpp: определяет точку входа для консольного приложения.
+//
+
+#include "stdafx.h"
+
+// макрос, занимающий мютекс до конца области действия
+#define SCOPE_LOCK_MUTEX(hMutex) CMutexLock _tmp_mtx_capt(hMutex);
+
+typedef struct _TList
+{
+   int *arr;
+   int size;
+} TList;
+
+static CAutoMutex g_mutex;				// автоматически создаваемый и удаляемый мютекс
+static CAutoEvent f_event;				// автоматически создаваемое и удаляемое событие
+
+
+DWORD WINAPI Writer(TList *param)				// запись в массив
+{		// мютекс не занят
+    int i;
+	for (i = 0; i < param->size; ++i)			
+	{
+		WaitForSingleObject(f_event.get(), INFINITE);		// дожидаемся события
+		SCOPE_LOCK_MUTEX(g_mutex.get());		// занимаем мютекс
+		param->arr[i] = i+1;					// изменяем общие данные
+		Sleep(200);								// ждем
+   }
+		// здесь мютекс освобождается
+		// мютекс не занят
+	return 0;
 }
 
-void create1Kfile(){//б)
-    HANDLE DIF;
-    DWORD c;    
-    DIF=CreateFile((LPCTSTR)"1KFile.txt", GENERIC_READ|GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);   
-    byte *data[1024];                                        //рандомный массив для заполнения входного файла
-    for(int i=0; i<1024; i++){
-        data[i]=(byte*)rand();
-    }
-    WriteFile(DIF,(LPVOID)data,1024,&c,NULL);
-	CloseHandle(DIF);  
+DWORD WINAPI Reader(TList *param)				// чтение из массива
+{		// мютекс не занят		
+   int i;
+   for (i = 0; i < param->size; ++i)
+   {
+      int j = 0;
+		SCOPE_LOCK_MUTEX(g_mutex.get());		// занимаем мютекс
+		while ((param->arr[j] != 0) && (j < param->size))
+		{
+			printf("%d ", param->arr[j]);
+			j++;
+		}
+		Sleep(100);							// ждем
+		SetEvent(f_event.get());
+		printf("\n");
+   }
+		// здесь мютекс освобождается
+		// мютекс не занят
+   return 0;
 }
 
-void resumeTread(LPVOID lpParam){
-    HANDLE myThread;
-    myThread = (HANDLE)lpParam;
-    ResumeThread(myThread);
-    WaitForSingleObject(myThread, INFINITE);
-}
-int main(){
-    __int64 c1, c2,fr1;			          //переменные для счётчика
-    double t1=0, t2=0;
-    LPDWORD ID;
-    HANDLE sThread, fThread;			//дескрипторы потоков
-	for (int i=0; i<10; i++){		    //повторение 10 раз
-        fThread=CreateThread(NULL,0, (LPTHREAD_START_ROUTINE)resumeTread, sThread, CREATE_SUSPENDED, (LPDWORD)&ID);
-                  //Null-указатель на поток не может быть унаследованн
-                  //0-размер стека будет установлен таким же как и для основного потока процесса
-                  //resumeTread-функция потока
-                  //sThread - это значение которое мы передаем в функцию в качестве параметра
-                  //CREATE_SUSPENDED - создан приостановленным
-                  //параметр, в котором будет возвращен идентификатор потока.
-            //CloseHandle(tThread);										//завершение потока
-        sThread=CreateThread(NULL,0, (LPTHREAD_START_ROUTINE)create0Kfile, NULL, CREATE_SUSPENDED, (LPDWORD)&ID);
-        QueryPerformanceCounter((LARGE_INTEGER *)&c1);				//начало отсчёта времени
-        ResumeThread(fThread);                                      //функция запускает 1й поток
-        WaitForSingleObject(fThread, INFINITE);
-        QueryPerformanceCounter((LARGE_INTEGER *)&c2);					//конец отсчёта времени
-        QueryPerformanceFrequency((LARGE_INTEGER *)&fr1);				//посчёт частоты
-        t1=(int)(c2-c1)/(float)fr1;
-        cout << "t"<< i << ": " << t1 <<endl;	//вывод времени
-    }
-    CloseHandle(fThread);	
-    CloseHandle(sThread);
-    return 0;
-}
+int _tmain(int argc, _TCHAR* argv[])
+{
+	int arr[] = {0,0,0,0,0,0,0,0,0,0};
+	int size = sizeof(arr) / sizeof(*arr);
+	TList lst = {arr, size};
 
+	CreateThread(NULL, 0, LPTHREAD_START_ROUTINE(&Writer), &lst, 0, 0);		//поток записи
+    CreateThread(NULL, 0, LPTHREAD_START_ROUTINE(&Reader), &lst, 0, 0);		//поток чтения
+
+	getch();
+	return 0;
+}
