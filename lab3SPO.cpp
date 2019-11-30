@@ -3,7 +3,7 @@
 #include <iostream>
 #include <windows.h>
 #include <assert.h>
-
+#include <queue> 
 using namespace std;
 //#include "stdafx.h"
 
@@ -18,7 +18,7 @@ class CAutoEvent
  public:
 	CAutoEvent()
 	{
-		e_h_event = CreateEvent(NULL, TRUE, FALSE, NULL);		//создаем событиек
+		e_h_event = CreateEvent(NULL, TRUE, FALSE, NULL);		//создаем событие
 		assert(e_h_event);								//заваливаем программу, если событие не создано
 	}
 	~CAutoEvent() { CloseHandle(e_h_event); }			//деструктор закрывает событие
@@ -65,10 +65,12 @@ static CAutoEvent f_event;				// автоматически создаваемо
 
 DWORD WINAPI Writer(TList *param){				// запись в массив
     int i; // мютекс не занят
+    Node * n = (param->arr)->first;
 	for (i = 0; i < param->size; ++i){
 		WaitForSingleObject(f_event.get(), INFINITE);		// дожидаемся события
 		SCOPE_LOCK_MUTEX(g_mutex.get());		// занимаем мютекс
-		param->arr[i] = i+1;					// изменяем общие данные
+		n->data = i+1;					// изменяем общие данные
+		n = n->next;
 		Sleep(200);								// ждем
    }
 		// здесь мютекс освобождается
@@ -81,10 +83,19 @@ DWORD WINAPI Reader(TList *param){				// чтение из массива
    for (i = 0; i < param->size; ++i){
       int j = 0;
 		SCOPE_LOCK_MUTEX(g_mutex.get());		// занимаем мютекс
-		while ((param->arr[j] != 0) && (j < param->size)){
-			printf("%d ", param->arr[j]);
-			j++;
-		}
+		//while ((param->arr[j] != 0) && (j < param->size)){
+			//printf("%d ", param->arr[j]);
+			//j++;
+		//}////////////////////
+		//void Print(Queue* Q){
+        Node * n = (param->arr)->first;
+        while(n){
+            cout << n->data << "  ";
+            printf("%d "\n, n->data);
+            n = n->next;
+        }
+        //cout << endl;
+}/////////////////////////
 		Sleep(100);							// ждем
 		SetEvent(f_event.get());
 		printf("\n");
@@ -95,9 +106,16 @@ DWORD WINAPI Reader(TList *param){				// чтение из массива
 }
 
 int main(){
-	int arr[] = {0,0,0,0,0,0,0,0,0,0};
-	int size = sizeof(arr) / sizeof(*arr);
-	TList lst = {arr, size};
+	//int arr[] = {0,0,0,0,0,0,0,0,0,0};
+	//int size = sizeof(arr) / sizeof(*arr);
+    //TList lst = {arr, size};
+    queue<int> myQueue;     // создаем пустую очередь типа  int
+    // добавили в очередь несколько элементов
+    for(int i=0;i<9;i++)
+        myQueue.push(0);
+    int size=sizeof(myQueue) / sizeof(*myQueue);
+    TList lst = myQueue, size};
+	
 	CreateThread(NULL, 0, LPTHREAD_START_ROUTINE(&Writer), &lst, 0, 0);		//поток записи
     CreateThread(NULL, 0, LPTHREAD_START_ROUTINE(&Reader), &lst, 0, 0);		//поток чтения
 	return 0;
