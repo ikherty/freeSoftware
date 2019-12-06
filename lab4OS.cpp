@@ -11,15 +11,12 @@
 
 int main(){
 	LARGE_INTEGER was, now, fr;
-    double timegone; 
+    double time; 
     bool bp;
-    time_t end, start;
-    double diff;
     STARTUPINFO cif;
     PROCESS_INFORMATION pi;
     for(int i=0; i<3; i++){
         QueryPerformanceCounter(&was); 
-        time(&start);
 		for(int j=0; j<(i+1)*10; j++){
                 ZeroMemory(&cif,sizeof(STARTUPINFO));
 				bp=CreateProcess("slep.exe",NULL,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&cif,&pi); 
@@ -28,8 +25,8 @@ int main(){
         }
         QueryPerformanceCounter(&now);  
 		QueryPerformanceFrequency(&fr);                
-        timegone =  (double)(now.QuadPart - was.QuadPart) / (double)fr.QuadPart;                             
-		std::cout<<"\nTime for "<<(i+1)*10<<" = "<<timegone;  
+        time=(double)(now.QuadPart-was.QuadPart)/(double)fr.QuadPart;                             
+		std::cout<<"\nTime for "<<(i+1)*10<<" = "<<time;  
     }
     return 0;
 }
