@@ -6,7 +6,6 @@
 
 #include <cstdlib>
 #include <windows.h>
-//#include <ctime>
 #include <iostream>
 
 int main(){
@@ -19,14 +18,14 @@ int main(){
         QueryPerformanceCounter(&was); 
 		for(int j=0; j<(i+1)*10; j++){
                 ZeroMemory(&cif,sizeof(STARTUPINFO));
-				bp=CreateProcess("slep.exe",NULL,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&cif,&pi); 
+				bp=CreateProcess("sleep.exe",NULL,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&cif,&pi); 
 				if(bp) 
 					WaitForSingleObject(pi.hProcess, INFINITE);
         }
         QueryPerformanceCounter(&now);  
 		QueryPerformanceFrequency(&fr);                
         time=(double)(now.QuadPart-was.QuadPart)/(double)fr.QuadPart;                             
-		std::cout<<"\nTime for "<<(i+1)*10<<" = "<<time;  
+		std::cout<<"\nTime for "<<(i+1)*10<<" = "<<time<<" s";  
     }
     return 0;
 }
