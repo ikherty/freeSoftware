@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <iostream>
 int main(){
-	Sleep(1000);
+	Sleep(100);
 }
