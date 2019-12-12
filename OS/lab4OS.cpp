@@ -20,16 +20,13 @@ int main(){
         QueryPerformanceCounter(&was); 
 		for(int j=0; j<(i+1)*10; j++){
                 ZeroMemory(&cif,sizeof(STARTUPINFO));
-                cif.dwFlags=STARTF_USESHOWWINDOW;
-                cif.wShowWindow = SW_MINIMIZE;
-                
+                cif.dwFlags=STARTF_USESIZE;
+                cif.dwXSize=2000;
+                cif.dwYSize=2000;
+                cif.wShowWindow = SW_SHOW;
 				bp=CreateProcess("sleep.exe",NULL,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&cif,&pi); 
 				if(bp) 
 					WaitForSingleObject(pi.hProcess, INFINITE);
-					
-				//pi.hProcess->ShowWindow(pi.hProcess, SW_MINIMIZE);
-				//ShowWindow(cif.hStdOutput,SW_HIDE);
-				//(dwProcessId);
         }
         QueryPerformanceCounter(&now);  
 		QueryPerformanceFrequency(&fr);                
