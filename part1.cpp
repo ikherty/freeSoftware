@@ -2,7 +2,7 @@
 Напишите программу fake, которая использует целочисленное значение первого аргумента в качестве статуса завершения.
 Выполните программу fake, задавая различные значения аргументов, включая большие и отрицательные.
 */
-#include<sys/types.h>
+//#include<sys/types.h>
 #include<sys/wait.h>
 #include<unistd.h>
 #include<stdlib.h>
@@ -18,7 +18,6 @@ int main(int argc, char **argv){
   int status=std::stoi(argv[1]);//преобразует первый аргумент в целочисленное значение
   pid_t pid; //определяет идентификатор процесса
   int s;
-  printf("expected exit status = %d\n", status);
   switch(pid = fork()){
         case -1://возникла ошибка
             perror("fork");
@@ -31,5 +30,5 @@ int main(int argc, char **argv){
 
 wait(& s);//приостанавливает выполнение текущего процесса до тех пор, пока дочерний процесс не завершится и возвращает статус
 printf("status exit fake function = %d\n",s); 
-
+printf("evaluation of the status low-order 8 bits %d\n",WEXITSTATUS(s));
 }
