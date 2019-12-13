@@ -4,16 +4,12 @@
 if [ -z $1 ]
 then
 echo "Command didnt write. Write command:"
-read command
+read $command
 else
 command=$1
 fi
-function myfunc{
-`$1`
-exit()
-}
-#`$command`
-result=$(myfunc command)
-echo "The value is $result"
-echo $?
+#добавить функцию с п
+$(command)
+
+#echo $?
 exit 0
