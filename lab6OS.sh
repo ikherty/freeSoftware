@@ -1,19 +1,21 @@
 #!/bin/bash
-#Напишите программу, запускающую указанную команду, и чтобы она возвращала статус вызова exit выполняемой команды. Что должно происходить, если вызов wait возвращает значение -1?
-
-if [ -z $1 ]
+#Объединить все файлы из указанного каталога с расширением ".txt" в один файл.  Имя каталога и файла вводится при выполнении сценария или задаётся в качестве параметра.
+if [ -z $1 ]||[ -z $2 ]
 then
-echo "Command didnt write. Write command:"
-read command
+echo "file name:"
+read file
+echo "Dir:"
+read dir
+elif [ !-d $2 ]
+then 
+exit 1
 else
-command=$1
+file=$1
+dir=$2
 fi
-function myfunc{
-`$1`
-exit()
-}
-#`$command`
-result=$(myfunc command)
-echo "The value is $result"
-echo $?
+
+cd $dir
+touch $file
+cat `ls | grep.txt` > $file
+
 exit 0
