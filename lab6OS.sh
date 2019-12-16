@@ -6,7 +6,7 @@ echo "file name:"
 read file
 echo "Dir:"
 read dir
-elif [ !-d $2 ]
+elif [ ! -d $2 ]
 then 
 exit 1
 else
@@ -15,7 +15,6 @@ dir=$2
 fi
 
 cd $dir
-touch $file
-cat `ls | grep.txt` > $file
+cat `ls | grep .txt` > $file
 
 exit 0
